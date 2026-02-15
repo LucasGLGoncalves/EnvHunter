@@ -1,0 +1,78 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: env-terminal-hacker
+  labels:
+    app: env-terminal-hacker
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: env-terminal-hacker
+  template:
+    metadata:
+      labels:
+        app: env-terminal-hacker
+    spec:
+      containers:
+        - name: env-terminal-hacker
+          # Troque pelo seu repositório/imagem
+          image: env-terminal-hacker:local
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 3000
+              name: http
+          # Demonstrando "env" (valores diretos / Downward API)
+          env:
+            - name: PORT
+              value: "3000"
+            - name: APP_BUILD_ID
+              value: "k8s-build"
+            - name: APP_DEPLOYMENT_ID
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.uid
+          # Demonstrando ConfigMap + Secret via envFrom
+          envFrom:
+            - configMapRef:
+                name: env-terminal-hacker-config
+            - secretRef:
+                name: env-terminal-hacker-secret
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 3
+            periodSeconds: 5
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: "25m"
+              memory: "64Mi"
+            limits:
+              cpu: "250m"
+              memory: "256Mi"
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: env-terminal-hacker
+  labels:
+    app: env-terminal-hacker
+spec:
+  type: ClusterIP
+  selector:
+    app: env-terminal-hacker
+  ports:
+    - name: http
+      port: 3000
+      targetPort: http
