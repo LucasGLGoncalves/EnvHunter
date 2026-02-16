@@ -114,3 +114,14 @@ Abra `http://localhost:3000`.
 docker build -t env-terminal-hacker:local ./src
 docker run --rm -p 3000:3000 env-terminal-hacker:local
 ```
+
+## Comandos uteis
+
+```bash
+kubectl create secret generic secret-env-config --from-literal=APP_PASSWORD=P@ss375 --from-literal=APP_DB_PASSWORD=DbP@ss! --from-literal=APP_ENCRYPTION_KEY="enc_256bits_deadbeefdeadbeefdeadbeefdeadbeef" --from-literal=APP_JWT_SECRET="jwt_secret_super_long_value_0123456789"
+```
+```bash
+kubectl describe secret secret-env-conf
+
+kubectl get secret -o yaml
+```
